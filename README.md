@@ -15,7 +15,7 @@ pip install git+https://github.com/lbasora/sectflow
 ```
 
 ## Use
-The **demo_clustering** notebook illustrates how to use the library. Also, it is important to read the [clustering](https://traffic-viz.github.io/clustering.html) documentation in the **traffic** library to understand how both libraries work together.
+The [demo_clustering](https://github.com/lbasora/sectflow/blob/master/demo_clustering.ipynb) notebook illustrates how to use the library. Also, it is important to read the [clustering](https://traffic-viz.github.io/clustering.html) documentation in the **traffic** library to understand how both libraries work together.
 
 The traffic features to be used for clustering are specified in the _features_ parameter of both the _TrajClust_ constructor and the _clustering_ method of the _Traffic_ class. 
 
