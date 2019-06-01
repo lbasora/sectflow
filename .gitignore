@@ -3,3 +3,6 @@
 .vscode/
 sectflow/.ipynb_checkpoints/
 sectflow/__pycache__/
+build/
+dist/
+sectflow.egg-info/
