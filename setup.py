@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="sectflow",
@@ -7,7 +7,7 @@ setup(
     url="https://github.com/lbasora/sectflow/",
     description="A trajectory clustering library to identify air traffic flow",
     license="MIT",
-    packages=["sectflow"],
+    packages=find_packages(),
     install_requires=["numpy", "sklearn"],  # "traffic>=1.2.1b0"],
     # dependency_links=[
     #     "https://github.com/xoolive/traffic/tarball/master#egg=traffic-1.2.1b0"
