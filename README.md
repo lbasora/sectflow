@@ -20,7 +20,7 @@ The only necessary dependencies are [Numpy](https://www.numpy.org/) and [scikit-
 To install **sectflow** and its dependencies run:
 
 ```
-pip install git+https://github.com/lbasora/sectflow
+python setup.py install
 ```
 
 ## Use
