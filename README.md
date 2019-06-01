@@ -7,10 +7,10 @@ This is a python library to identify the air traffic flows in a ATC sector/airsp
 
 The clustering method is described in this paper as part of a larger framework to estimate the occupancy peak (capacity) of a ATC sector based on its traffic flow and geometric characteristics.
 
-[2] X. Olive and L. Basora
+[2] X. Olive and L. Basora.
 **Identifying Anomalies in past en-route Trajectories with Clustering and Anomaly Detection Methods**. Proceedings of the 13th Air Traffic Management R&D Seminar, 2019
 
-The same clustering method has been also used in this ATM Seminar paper in order to identify the 3D flows in a sector as a preliminar step to detect trajectory anomalies in the flows.
+The same clustering method has been also used in this ATM Seminar paper in order to identify the 3D flows in a sector as a preliminary step to detect trajectory anomalies in the flows.
 
 ## Installation
 Although **sectflow** is not directly dependent on the [traffic](https://github.com/xoolive/traffic) library, it has been designed to work closely integrated with it. See **traffic** installation instructions [here](https://github.com/xoolive/traffic).
@@ -33,6 +33,8 @@ Thus, traffic flows can be identified in 2D if only features _x_ an _y_ (or _lat
 Please note that in any case  _x_ an _y_ are mandatory features, even if _latitude_ and _longitude_ are also provided. This is because the coordinate projections are needed for internal flow computation. If the traffic dataset does not contain the projected _x_ an _y_ coordinates, they will be automatically computed by the **traffic** library before calling **sectflow** _fit_ method.
 
 ## Screenshots
+These are only some examples of 2D/3D plots of the cluster centroids and trajectories you can generated from the library.
+
 ![image](https://user-images.githubusercontent.com/41791151/58747600-c3a23500-846d-11e9-8f3e-72cba4407156.png)
 ![image](https://user-images.githubusercontent.com/41791151/58747604-cf8df700-846d-11e9-80db-9a9e0543209e.png)
 ![image](https://user-images.githubusercontent.com/41791151/58747607-df0d4000-846d-11e9-98b7-4087e38df887.png)
