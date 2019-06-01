@@ -8,7 +8,7 @@ setup(
     description="A trajectory clustering library to identify air traffic flow",
     license="MIT",
     packages=["sectflow"],
-    install_requires=["numpy", "sklearn"]#, "traffic>=1.2.1b0"],
+    install_requires=["numpy", "sklearn"],  # "traffic>=1.2.1b0"],
     # dependency_links=[
     #     "https://github.com/xoolive/traffic/tarball/master#egg=traffic-1.2.1b0"
     # ],
