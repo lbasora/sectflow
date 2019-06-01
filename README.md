@@ -1,7 +1,16 @@
 # sectflow
 This is a python library to identify the air traffic flows in a ATC sector/airspace by applying a progressive 2D/3D trajectory clustering method based on DBSCAN.
 
-The method is described in the paper [Occupancy Peak Estimation from Sector Geometry and Traffic Flow data](https://www.sesarju.eu/sites/default/files/documents/sid/2018/papers/SIDs_2018_paper_23.pdf). It has been developed as part of a larger framework to estimate the occupancy peak (capacity) of a ATC sector based on its traffic flow and geometric characteristics.
+## Publications
+[1] L. Basora, V. Courchelle, J. Bedouet and T. Dubot.
+[Occupancy Peak Estimation from Sector Geometry and Traffic Flow](https://www.sesarju.eu/sites/default/files/documents/sid/2018/papers/SIDs_2018_paper_23.pdf). Proceedings of the SESAR Innovation Days, 2018
+
+The clustering method is described in this paper as part of a larger framework to estimate the occupancy peak (capacity) of a ATC sector based on its traffic flow and geometric characteristics.
+
+[2] X. Olive and L. Basora
+**Identifying Anomalies in past en-route Trajectories with Clustering and Anomaly Detection Methods**. Proceedings of the 13th Air Traffic Management R&D Seminar, 2019
+
+The same clustering method has been also used in this ATM Seminar paper in order to identify the 3D flows in a sector as a preliminar step to detect trajectory anomalies in the flows.
 
 ## Installation
 Although **sectflow** is not directly dependent on the [traffic](https://github.com/xoolive/traffic) library, it has been designed to work closely integrated with it. See **traffic** installation instructions [here](https://github.com/xoolive/traffic).
