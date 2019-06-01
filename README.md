@@ -23,6 +23,8 @@ Thus, traffic flows can be identified in 2D if only features _x_ an _y_ (or _lat
 
 Please note that in any case  _x_ an _y_ are mandatory features, even if _latitude_ and _longitude_ are also provided. This is because the coordinate projections are needed for internal flow computation. If the traffic dataset does not contain the projected _x_ an _y_ coordinates, they will be automatically computed by the **traffic** library before calling **sectflow** _fit_ method.
 
+## Screenplots
+![image](https://user-images.githubusercontent.com/41791151/58692817-b4e55080-838f-11e9-8a5f-ff485d6be026.png)
 
 
 
