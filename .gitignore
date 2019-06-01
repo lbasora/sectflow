@@ -1,0 +1,5 @@
+.ipynb_checkpoints/
+.mypy_cache/
+.vscode/
+sectflow/.ipynb_checkpoints/
+sectflow/__pycache__/

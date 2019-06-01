@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import pandas as pd
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 
@@ -177,7 +176,7 @@ class TrajClust:
                     if l == k:
                         labels[i] = -1
 
-        self.set_new_ids(labels)
+        self._set_new_ids(labels)
 
         return (labels, min_cluster_size)
 
@@ -219,7 +218,7 @@ class TrajClust:
         return (labels, centroids)
 
     def _update_cluster_ids(self, labels, sv):
-        self.set_new_ids(labels)
+        self._set_new_ids(labels)
         centroids = self._create_centroids(sv, labels)
         return labels, centroids
 
@@ -289,19 +288,19 @@ class TrajClust:
         m = 100000000
         host_clust_id = None
         if isinstance(item, int):
-            U0, UN, Ualt, U_evol = self.get_vect(centroids[item])
+            U0, UN, Ualt, U_evol = self._get_vect(centroids[item])
             for k in range(len(centroids)):
                 if k != item:
-                    dist = self.get_dist(
+                    dist = self._get_dist(
                         centroids[k], U0, UN, Ualt, U_evol, self.flow_merge_dist
                     )
                     if dist is not None and dist < m:
                         host_clust_id = k
                         m = dist
         else:
-            U0, UN, Ualt, U_evol = self.get_vect(item)
+            U0, UN, Ualt, U_evol = self._get_vect(item)
             for k in range(len(centroids)):
-                dist = self.get_dist(
+                dist = self._get_dist(
                     centroids[k], U0, UN, Ualt, U_evol, self.outlier_merge_dist
                 )
                 if dist is not None and dist < m:
@@ -310,8 +309,8 @@ class TrajClust:
 
         return host_clust_id
 
-    def get_dist(self, centroid, U0, UN, Ualt, U_evol, merge_dist):
-        V0, VN, Valt, V_evol = self.get_vect(centroid)
+    def _get_dist(self, centroid, U0, UN, Ualt, U_evol, merge_dist):
+        V0, VN, Valt, V_evol = self._get_vect(centroid)
         dist0 = np.sqrt(sum((U0 - V0) ** 2)) / 1852
         distN = np.sqrt(sum((UN - VN) ** 2)) / 1852
         dh = abs(Ualt - Valt)
@@ -326,8 +325,8 @@ class TrajClust:
         return dist
 
     def _check_cluster_proximity(self, cluster_id, host_cluster_id, centroids):
-        U0, UN, _, U_evol = self.get_vect(centroids[cluster_id])
-        V0, VN, _, V_evol = self.get_vect(centroids[host_cluster_id])
+        U0, UN, _, U_evol = self._get_vect(centroids[cluster_id])
+        V0, VN, _, V_evol = self._get_vect(centroids[host_cluster_id])
 
         dist0 = np.sqrt(sum((U0 - V0) ** 2)) / 1852
         distN = np.sqrt(sum((UN - VN) ** 2)) / 1852
@@ -338,7 +337,7 @@ class TrajClust:
             and U_evol == V_evol
         )
 
-    def get_vect(self, item):
+    def _get_vect(self, item):
         y0, x0, yN, xN, a0, aN = self._get_features(item)
         U0 = np.array([x0, y0])
         UN = np.array([xN, yN])
@@ -358,12 +357,12 @@ class TrajClust:
             for k, l in enumerate(labels):
                 if l == cluster_id:
                     labels[k] = host_cluster_id
-            self.set_new_ids(labels)
+            self._set_new_ids(labels)
         return (labels, b)
 
-    def set_new_ids(self, labels):
-        sorted_cluster_ids = sorted(list(pd.Series(labels).unique()))
-        new_cluster_ids = [k for k in range(-1, len(sorted_cluster_ids) - 1)]
-        for k, l in enumerate(labels):
-            if l != -1:
-                labels[k] = new_cluster_ids[sorted_cluster_ids.index(l)]
+    def _set_new_ids(self, labels):
+        u_labels = np.unique(labels)
+        if u_labels[0] == -1:
+            u_labels = u_labels[1:] 
+        for _, l in enumerate(u_labels):
+            labels[labels == l] = np.argwhere(u_labels == l)[0]

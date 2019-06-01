@@ -1,3 +1,5 @@
+from itertools import cycle, islice
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
@@ -61,6 +63,45 @@ class Annotation3D(Annotation):
 def annotate3D(ax, s, *args, **kwargs):
     tag = Annotation3D(s, *args, **kwargs)
     ax.add_artist(tag)
+
+def plot_trajs(tc, sector):
+    n_clusters_ = int(1 + tc.data.cluster.max())
+
+    #  -- dealing with colours --
+    color_cycle = cycle(
+        ["#377eb8", "#ff7f00", "#4daf4a", "#f781bf"]
+        + ["#a65628", "#984ea3", "#999999", "#e41a1c", "#dede00"]
+    )
+
+    colors = list(islice(color_cycle, n_clusters_))
+    colors.append("#aaaaaa")  # color for outliers, if any
+
+    # -- dealing with the grid --
+
+    nb_cols = 3
+    nb_lines = (1 + n_clusters_) // nb_cols + (((1 + n_clusters_) % nb_cols) > 0)
+
+    def ax_iter(axes):
+        if len(axes.shape) == 1:
+            yield from axes
+        if len(axes.shape) == 2:
+            for ax_ in axes:
+                yield from ax_
+
+    with plt.style.context("traffic"):
+        fig, ax = plt.subplots(
+            nb_lines, nb_cols, subplot_kw=dict(projection=Lambert93())
+        )
+
+        for cluster, ax_ in zip(range(-1, n_clusters_), ax_iter(ax)):
+            ax_.add_feature(countries())
+            ax_.add_feature(rivers())
+
+            tc.query(f"cluster == {cluster}").plot(ax_, color=colors[cluster])
+
+            ax_.set_extent(sector)
+
+            sector.plot(ax_, lw=2)
 
 
 def clusters_plot2d(
@@ -131,7 +172,13 @@ def clusters_plot2d(
 
 
 def clusters_plot3d(
-    sector, t, centroids, plot_trajs=False, plot_clust=None, video=True
+    sector, t,  
+    nb_samples,
+    projection,
+    scaler=None, 
+    plot_trajs=False, 
+    plot_clust=None, 
+    video=True,
 ):
     coords = np.stack(sector.flatten().exterior.coords)
     sector_Lon = [coords[k][0] for k in range(len(coords))]
@@ -146,103 +193,107 @@ def clusters_plot3d(
     lower = min(Lower)
     if upper == np.inf:
         upper = 45000
+    
+    with plt.style.context("traffic"):
+        fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
+        #fig = plt.figure()
+        #ax = plt.axes(projection="3d")
+        ax.set_zlim(bottom=0, top=upper)
+        ax.set_xlim(lonMin, lonMax)
+        ax.set_ylim(latMin, latMax)
 
-    fig = plt.figure(figsize=(15, 15))
-    ax = plt.axes(projection="3d")
-    ax.set_zlim(bottom=0, top=upper)
-    ax.set_xlim(lonMin, lonMax)
-    ax.set_ylim(latMin, latMax)
-
-    ax.plot(
-        sector_Lon,
-        sector_Lat,
-        [lower for k in sector_Lon],
-        color="#3a3aaa",
-        lw=2,
-        alpha=0.5,
-    )
-    ax.plot(
-        sector_Lon,
-        sector_Lat,
-        [upper for k in sector_Lon],
-        color="#3a3aaa",
-        lw=2,
-        alpha=0.5,
-    )
-    for dot in zip(sector_Lon, sector_Lat):
         ax.plot(
-            [dot[0], dot[0]],
-            [dot[1], dot[1]],
-            [lower, upper],
+            sector_Lon,
+            sector_Lat,
+            [lower for k in sector_Lon],
             color="#3a3aaa",
             lw=2,
             alpha=0.5,
         )
-
-    clust_ids = sorted(t.data.cluster.unique())
-    if plot_clust is None:
-        plot_clust = clust_ids
-
-    L = [
-        sum([l == cid for l in t.data["cluster"]]) / len(t.data["cluster"])
-        for cid in clust_ids
-    ]
-
-    for cid in plot_clust:
-        if plot_trajs:
-            tc = t.query(f"cluster=={cid}")
-            for flight in tc:
-                lon = list(flight.data["longitude"])
-                lat = list(flight.data["latitude"])
-                alt = list(flight.data["altitude"])
-                cid = flight.data.cluster_id.iloc[0]
-                if cid != -1 and L[cid] >= 0.01:
-                    ax.plot(lon, lat, alt, color=C[cid], lw=1, alpha=1)
-                else:
-                    ax.plot(lon, lat, alt, color="grey", lw=1, alpha=0.5)
-
-        l = L[cid]
-        if l < 0.05:
-            lw = 3
-        elif l < 0.1:
-            lw = 5
-        else:
-            lw = 7
-        if cid != -1 and L[cid] >= 0.01:
-            cent = centroids.loc[cid]
-            lon = list(cent["longitude"])
-            lat = list(cent["latitude"])
-            alt = list(cent["altitude"])
-            ax.plot(lon, lat, alt, color=C[cid], lw=lw)
-            a = Arrow3D(
-                [lon[-5], lon[-1]],
-                [lat[-5], lat[-1]],
-                [alt[-5], alt[-1]],
-                mutation_scale=20,
-                lw=lw,
-                arrowstyle="-|>",
-                color=C[cid],
-            )
-            annotate3D(
-                ax,
-                s=str(cid),
-                xyz=(lon[-1], lat[-1], alt[-1]),
-                fontsize=25,
-                xytext=(-3, 3),
-                textcoords="offset points",
-                ha="right",
-                va="bottom",
-                color=C[cid],
-            )
-            ax.add_artist(a)
-    if video:
-
-        def animate(i):
-            ax.view_init(20 + 5 * np.sin(i / 20), -60)
-            return []
-
-        return animation.FuncAnimation(
-            fig, animate, frames=90, interval=200, blit=True
+        ax.plot(
+            sector_Lon,
+            sector_Lat,
+            [upper for k in sector_Lon],
+            color="#3a3aaa",
+            lw=2,
+            alpha=0.5,
         )
-    else:
-        plt.show()
+        for dot in zip(sector_Lon, sector_Lat):
+            ax.plot(
+                [dot[0], dot[0]],
+                [dot[1], dot[1]],
+                [lower, upper],
+                color="#3a3aaa",
+                lw=2,
+                alpha=0.5,
+            )
+
+        clust_ids = sorted(t.data.cluster.unique())
+        if plot_clust is None:
+            plot_clust = clust_ids
+
+        L = [
+            sum([l == cid for l in t.data["cluster"]]) / len(t.data["cluster"])
+            for cid in clust_ids
+        ]
+
+        for cid in plot_clust:
+            tc = t.query(f"cluster=={cid}")
+            if plot_trajs:            
+                for flight in tc:
+                    lon = list(flight.data["longitude"])
+                    lat = list(flight.data["latitude"])
+                    alt = list(flight.data["altitude"])
+                    cid = flight.data.cluster_id.iloc[0]
+                    if cid != -1 and L[cid] >= 0.01:
+                        ax.plot(lon, lat, alt, color=C[cid], lw=1, alpha=1)
+                    else:
+                        ax.plot(lon, lat, alt, color="grey", lw=1, alpha=0.5)
+
+            l = L[cid]
+            if l < 0.05:
+                lw = 3
+            elif l < 0.1:
+                lw = 5
+            else:
+                lw = 7
+            if cid != -1 and L[cid] >= 0.01:
+                cent = tc.centroid(
+                        nb_samples, projection=projection, transformer=scaler
+                ).data
+                lon = list(cent["longitude"])
+                lat = list(cent["latitude"])
+                alt = list(cent["altitude"])
+                ax.plot(lon, lat, alt, color=C[cid], lw=lw)
+                a = Arrow3D(
+                    [lon[-5], lon[-1]],
+                    [lat[-5], lat[-1]],
+                    [alt[-5], alt[-1]],
+                    mutation_scale=20,
+                    lw=lw,
+                    arrowstyle="-|>",
+                    color=C[cid],
+                )
+                annotate3D(
+                    ax,
+                    s=str(cid),
+                    xyz=(lon[-1], lat[-1], alt[-1]),
+                    fontsize=25,
+                    xytext=(-3, 3),
+                    textcoords="offset points",
+                    ha="right",
+                    va="bottom",
+                    color=C[cid],
+                )
+                ax.add_artist(a)
+        if video:
+
+            def animate(i):
+                ax.view_init(20 + 5 * np.sin(i / 20), -60)
+                return []
+
+            return animation.FuncAnimation(
+                fig, animate, frames=90, interval=200, blit=True
+            )
+        else:
+            plt.show()
